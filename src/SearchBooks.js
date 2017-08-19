@@ -3,12 +3,18 @@ import { Link } from 'react-router-dom'
 //import PropTypes from 'prop-types'
 import Book from './Book'
 import * as BooksAPI from './BooksAPI'
+import { debounce } from 'lodash';
 
 class SearchBooks extends Component {
+
   state = {
     searchQuery: '',
 	showingBooks: []
   }
+  componentWillMount() {//avoid errors on your search and control how many times this function is being called by using debounce or throttle
+    this.updateQuery = debounce(this.updateQuery,100);
+  }
+  
 
   updateQuery = (query) => {
     if(query) {
