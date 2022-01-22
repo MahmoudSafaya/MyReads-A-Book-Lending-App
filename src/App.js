@@ -1,8 +1,8 @@
 import React from 'react'
 import { Route } from 'react-router-dom'
 import * as BooksAPI from './BooksAPI'
-import ListBooks from './ListBooks'
-import SearchBooks from './SearchBooks'
+import Home from './components/Home'
+import Search from './components/Search'
 
 import './App.css'
 
@@ -11,18 +11,20 @@ class BooksApp extends React.Component {
     books: []
   }
   
-  componentDidMount() {
-    BooksAPI.getAll().then((books) => {
+  async componentDidMount() {
+    const books = await BooksAPI.getAll();
       this.setState({ books })
-    })
   }
   
-  updateBook = (book, shelf) => {
+  updateShelf = (book, shelf) => {
     book.shelf = shelf
-	console.log(this.state.books)
-	if(this.state.books.indexOf(book) < 0){//It means it is a new book in our shelf
-		this.state.books.push(book)
-	}
+    if(this.state.books.findIndex(({id}) => id === book.id)){
+      this.setState((prevState, props) => {
+        return{
+          books: prevState.books.concat(book)
+        }
+      })
+    }
     BooksAPI.update(book, shelf).then(
       this.setState((prevState, props) => {
         return {
@@ -35,20 +37,14 @@ class BooksApp extends React.Component {
   render() {
     return (
       <div className="app">
-	    <Route exact path='/' render={() => (
-		  <ListBooks
-            books={this.state.books}
-			updateBook={this.updateBook}
-		  />
-  		)}/>
+        <Route exact path='/' render={() => (
+          <Home books={this.state.books} updateShelf={this.updateShelf} />
+        )}/>
 
-		<Route exact path='/search' render={() => (
-		  <SearchBooks
-            books={this.state.books}
-			updateBook={this.updateBook}		
-          />
-		)}/>
-	  </div>
+        <Route exact path='/search' render={() => (
+          <Search books={this.state.books} updateShelf={this.updateShelf}	/>
+        )}/>
+      </div>
     )
   }
 
